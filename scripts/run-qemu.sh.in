@@ -1,5 +1,7 @@
 #!/bin/sh
 
+SHELL_FOLDER=$(cd "$(dirname "$0")";pwd)
+
 export HOST_PORT=@qemu_ssh_port@;
 
 echo "**** Running QEMU SSH on port ${HOST_PORT} ****";
@@ -20,15 +22,22 @@ while [ "$1" != "" ]; do
     shift;
 done;
 
+
 @qemu_system@ \
  $DEBUG \
  -m 2G \
- -nographic \
+ --display gtk,zoom-to-fit=false --serial stdio --monitor vc:1280x720 --parallel none \
+ -global virtio-mmio.force-legacy=false \
  -machine virt,rom=@bootrom_wrkdir@/bootrom.bin \
  -bios @fw_elf@ \
  -kernel @linux_image@ \
  @extra_qemu_options@ \
+ -fsdev local,security_model=mapped-xattr,path=$SHELL_FOLDER/..,id=fsdev0 \
  -netdev user,id=net0,net=192.168.100.1/24,dhcpstart=192.168.100.128,hostfwd=tcp::${HOST_PORT}-:22 \
+ -device virtio-gpu-device,xres=1280,yres=720,id=video0 \
+ -device virtio-mouse-device,id=input0 \
+ -device virtio-keyboard-device,id=input1 \
  -device virtio-net-device,netdev=net0 \
+ -device virtio-9p-device,fsdev=fsdev0,mount_tag=hostshare,id=fs0 \
  -device virtio-rng-pci \
  -smp $SMP

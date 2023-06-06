@@ -30,6 +30,7 @@ BR2_TARGET_GENERIC_ROOT_PASSWD="sifive"
 
 # Filesystem
 BR2_TARGET_ROOTFS_EXT2=y
+BR2_TARGET_ROOTFS_EXT2_SIZE="1G"
 BR2_ROOTFS_OVERLAY=""
 
 # Linux headers same as kernel, a 5.1 series
